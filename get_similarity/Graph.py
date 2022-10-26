@@ -19,7 +19,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-class Graph_data(object):
+class Graph_structure(object):
 
     def __init__(self, threshold: float = 0.5) -> None:
         self.Graph = nx.Graph()
