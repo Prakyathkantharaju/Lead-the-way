@@ -3,6 +3,9 @@ import cv2
 import pygame
 import numpy as np
 import time
+from get_similarity.Graph import Graph_structure
+import matplotlib.pyplot as plt
+import networkx as nx
 
 # Speed of the drone
 
@@ -32,7 +35,7 @@ class FrontEnd(object):
 
         # Creat pygame window
         pygame.display.set_caption("Tello video stream")
-        self.screen = pygame.display.set_mode([960, 720])
+        self.screen = pygame.display.set_mode([960 * 2, 720])
 
         # Init Tello object that interacts with the Tello drone
         # 初始化与Tello交互的Tello对象
@@ -52,6 +55,26 @@ class FrontEnd(object):
         # 创建上传定时器
         pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // FPS)
 
+        # Custom setting realted to graph creating
+        self.COUNTER  = 0
+        self.graph = Graph_structure()
+        self.action_array = [0,0,0]
+        self.fig, self.ax = plt.subplots(1,1)
+        self.action_array = [0,0,0]
+        self.data = np.ones((960, 720,3), dtype=np.uint8) *255
+
+    def _graph_helper(self, img):
+        self.graph.add_images(img, self.action_array)
+        nx.draw(self.graph.Graph, ax = self.ax, with_labels = True)
+        self.fig.canvas.draw()
+        data = np.frombuffer(self.fig.canvas.tostring_rgb(), dtype=np.uint8)
+        data = data.reshape(self.fig.canvas.get_width_height()[::-1] + (3,))
+        data = cv2.resize(data, (720, 960), interpolation=cv2.INTER_AREA)
+        self.COUNTER = 0
+        return data
+
+        
+
     def run(self):
 
         self.tello.connect()
@@ -66,6 +89,7 @@ class FrontEnd(object):
 
         should_stop = False
         while not should_stop:
+            self.COUNTER += 1
 
             for event in pygame.event.get():
                 if event.type == pygame.USEREVENT + 1:
@@ -91,14 +115,22 @@ class FrontEnd(object):
             cv2.putText(frame, text, (5, 720 - 5),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
             frame = np.rot90(frame)
             frame = np.flipud(frame)
+            if self.COUNTER == 120:
+                self.data = self._graph_helper(frame)
+            print(frame.shape, self.data.shape, self.COUNTER)
+            frame = np.concatenate((frame, self.data), axis = 0)
+
 
             frame = pygame.surfarray.make_surface(frame)
             self.screen.blit(frame, (0, 0))
             pygame.display.update()
 
             time.sleep(1 / FPS)
+
+
 
         # Call it always before finishing. To deallocate resources.
         # 通常在结束前调用它以释放资源
@@ -160,6 +192,7 @@ class FrontEnd(object):
             向Tello发送各方向速度信息
         """
         if self.send_rc_control:
+            self.action_array = [self.left_right_velocity, self.for_back_velocity, self.yaw_velocity]
             self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
                 self.up_down_velocity, self.yaw_velocity)
 
