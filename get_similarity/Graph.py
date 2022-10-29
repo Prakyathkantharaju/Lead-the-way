@@ -89,6 +89,7 @@ class Graph_structure(object):
         if self.Graph.number_of_nodes() == 0:
             self._add_initial_nodes()
         else:
+            # check if the previous node was 
             self._add_initial_nodes()
             assert len(self.features) == 3
             self._find_root_edge(X_Y_R)
