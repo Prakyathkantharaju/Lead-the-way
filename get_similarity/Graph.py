@@ -69,9 +69,9 @@ class Graph_structure(object):
     def _find_root_edge(self, X_Y_R: List[float], threshold: float  = 0.5):
         number = self.Graph.number_of_nodes()
         n = self._match_root_nodes(self.features[1], threshold = 0.5, top_threshold = number - 3, bottom_threshold = number - 6)
-        assert n != -1
         weight = np.sqrt( (X_Y_R[0] * X_Y_R[2]) ** 2 + X_Y_R[1] ** 2)
-        self.Graph.add_edge(n, self.central_nodes, weight = weight, direction = 0, distance = X_Y_R)
+        if n != -1:
+            self.Graph.add_edge(n, self.central_nodes, weight = weight, direction = 0, distance = X_Y_R)
     
     def _match_root_nodes(self, features, threshold, top_threshold, bottom_threshold):
         feature_dict = nx.get_node_attributes(self.Graph, "features")
@@ -80,7 +80,10 @@ class Graph_structure(object):
             if key > bottom_threshold and key < top_threshold:
                 v = self.cos(features, value)
                 values[key] = v
-        return max(values, key=values.get)
+        if len(values) == 0:
+            return -1
+        else: 
+            return max(values, key=values.get)
 
             
         

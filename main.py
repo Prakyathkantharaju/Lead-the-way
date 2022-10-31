@@ -34,7 +34,7 @@ class FrontEnd(object):
         pygame.init()
 
         # Creat pygame window
-        pygame.display.set_caption("Tello video stream")
+        pygame.display.set_caption("Left Tello stream | Right knowledge graph")
         self.screen = pygame.display.set_mode([960 * 2, 720])
 
         # Init Tello object that interacts with the Tello drone
@@ -64,6 +64,15 @@ class FrontEnd(object):
         self.data = np.ones((960, 720,3), dtype=np.uint8) *255
 
     def _graph_helper(self, img):
+        print(self.graph.Graph.number_of_nodes())
+
+        if self.graph.Graph.number_of_nodes() > 30:
+            print("#######" * 100)
+            print("storing the data")
+            nx.write_gpickle(self.graph.Graph, "graph_data.gpickle")
+            self.graph.Graph = nx.Graph()
+
+
         self.graph.add_images(img, self.action_array)
         nx.draw(self.graph.Graph, ax = self.ax, with_labels = True)
         self.fig.canvas.draw()
@@ -71,6 +80,7 @@ class FrontEnd(object):
         data = data.reshape(self.fig.canvas.get_width_height()[::-1] + (3,))
         data = cv2.resize(data, (720, 960), interpolation=cv2.INTER_AREA)
         self.COUNTER = 0
+        # self.action_array = [0, 0, 0]
         return data
 
         
@@ -118,7 +128,7 @@ class FrontEnd(object):
             
             frame = np.rot90(frame)
             frame = np.flipud(frame)
-            if self.COUNTER == 120:
+            if self.COUNTER == 30:
                 self.data = self._graph_helper(frame)
             print(frame.shape, self.data.shape, self.COUNTER)
             frame = np.concatenate((frame, self.data), axis = 0)
@@ -192,7 +202,9 @@ class FrontEnd(object):
             向Tello发送各方向速度信息
         """
         if self.send_rc_control:
-            self.action_array = [self.left_right_velocity, self.for_back_velocity, self.yaw_velocity]
+            self.action_array[0] += self.left_right_velocity
+            self.action_array[1] + self.for_back_velocity
+            self.action_array[2] + self.yaw_velocity
             self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
                 self.up_down_velocity, self.yaw_velocity)
 
