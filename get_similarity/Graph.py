@@ -14,6 +14,7 @@ import networkx as nx
 from efficientnet_pytorch import EfficientNet
 
 from typing import Tuple, List
+import copy
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -32,6 +33,7 @@ class Graph_structure(object):
         self.N_images = 3
         self.images = ()
         self.features = []
+        self.node_number = 1
 
     def _get_three_images(self, img: npt.ArrayLike) ->  Tuple:
         dim = img.shape[0]
@@ -47,31 +49,34 @@ class Graph_structure(object):
         self.images = self._get_three_images(img)
         self._process_images(X_Y_R)
 
-    def _add_node(self, number: int, features: npt.ArrayLike) -> None:
-        self.Graph.add_node(number, features = features)
+    def _add_node(self, number: int, features: npt.ArrayLike, images = npt.ArrayLike) -> None:
+        self.Graph.add_node(number, features = features, images = images)
 
     def _add_initial_nodes(self):
         self.features = []
         self.central_nodes = 0
-        number = self.Graph.number_of_nodes()
+        number = self.node_number
         nodes_add = []
         for i in range(3):
             self.features.append(self._get_features(self.images[i]))
             if i == 1:
                 self.central_nodes = number  + i
-            self._add_node(number + i, self.features[-1])
+            self._add_node(number + i, self.features[-1], self.images[i])
             nodes_add.append(number + i)
 
         # adding edges to the nodes
         self.Graph.add_edge(nodes_add[0], nodes_add[1], weight = 0.1, direction = '-1', distance = [])
         self.Graph.add_edge(nodes_add[1], nodes_add[2], weight = 0.1, direction = '1', distance = [])
 
+        # update the node number
+        self.node_number += 3
+
     def _find_root_edge(self, X_Y_R: List[float], threshold: float  = 0.5):
-        number = self.Graph.number_of_nodes()
+        number = self.node_number
         n = self._match_root_nodes(self.features[1], threshold = 0.5, top_threshold = number - 3, bottom_threshold = number - 6)
         weight = np.sqrt( (X_Y_R[0] * X_Y_R[2]) ** 2 + X_Y_R[1] ** 2)
         if n != -1:
-            self.Graph.add_edge(n, self.central_nodes, weight = weight, direction = 0, distance = X_Y_R)
+            self.Graph.add_edge(n, self.central_nodes, weight = weight, direction = 0, distance = copy.copy(X_Y_R))
     
     def _match_root_nodes(self, features, threshold, top_threshold, bottom_threshold):
         feature_dict = nx.get_node_attributes(self.Graph, "features")
@@ -88,7 +93,7 @@ class Graph_structure(object):
             
         
 
-    def _process_images(self, X_Y_R: List[float] ) -> None:
+    def _process_images(self, X_Y_R: List[float]) -> None:
         if self.Graph.number_of_nodes() == 0:
             self._add_initial_nodes()
         else:

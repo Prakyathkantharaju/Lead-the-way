@@ -3,7 +3,7 @@ import cv2
 import pygame
 import numpy as np
 import time
-from get_similarity.Graph import Graph_structure
+from get_similarity.Graph_v2 import Graph_structure
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -52,7 +52,6 @@ class FrontEnd(object):
         self.send_rc_control = False
 
         # create update timer
-        # 创建上传定时器
         pygame.time.set_timer(pygame.USEREVENT + 1, 1000 // FPS)
 
         # Custom setting realted to graph creating
@@ -62,17 +61,19 @@ class FrontEnd(object):
         self.fig, self.ax = plt.subplots(1,1)
         self.action_array = [0,0,0]
         self.data = np.ones((960, 720,3), dtype=np.uint8) *255
+        self.save_counter = 0
 
     def _graph_helper(self, img):
-        print(self.graph.Graph.number_of_nodes())
-
         if self.graph.Graph.number_of_nodes() > 30:
             print("#######" * 100)
             print("storing the data")
-            nx.write_gpickle(self.graph.Graph, "graph_data.gpickle")
+        
+            self.save_counter += 1
+            nx.write_gpickle(self.graph.Graph, f"graph_store/graph_data_{self.save_counter}.gpickle")
             self.graph.Graph = nx.Graph()
+            self.action_array = [0,0,0]
 
-
+        self.ax.cla()
         self.graph.add_images(img, self.action_array)
         nx.draw(self.graph.Graph, ax = self.ax, with_labels = True)
         self.fig.canvas.draw()
@@ -91,7 +92,6 @@ class FrontEnd(object):
         self.tello.set_speed(self.speed)
 
         # In case streaming is on. This happens when we quit this program without the escape key.
-        # 防止视频流已开启。这会在不使用ESC键退出的情况下发生。
         self.tello.streamoff()
         self.tello.streamon()
 
@@ -128,9 +128,8 @@ class FrontEnd(object):
             
             frame = np.rot90(frame)
             frame = np.flipud(frame)
-            if self.COUNTER == 30:
+            if self.COUNTER == 10:
                 self.data = self._graph_helper(frame)
-            print(frame.shape, self.data.shape, self.COUNTER)
             frame = np.concatenate((frame, self.data), axis = 0)
 
 
@@ -143,7 +142,6 @@ class FrontEnd(object):
 
 
         # Call it always before finishing. To deallocate resources.
-        # 通常在结束前调用它以释放资源
         self.tello.end()
 
     def keydown(self, key):
@@ -151,9 +149,6 @@ class FrontEnd(object):
         Arguments:
             key: pygame key
 
-        基于键的按下上传各个方向的速度
-        参数：
-            key：pygame事件循环中的键事件
         """
         if key == pygame.K_UP:  # set forward velocity
             self.for_back_velocity = S
@@ -177,9 +172,7 @@ class FrontEnd(object):
         Arguments:
             key: pygame key
 
-        基于键的松开上传各个方向的速度
-        参数：
-            key：pygame事件循环中的键事件
+        
         """
         if key == pygame.K_UP or key == pygame.K_DOWN:  # set zero forward/backward velocity
             self.for_back_velocity = 0
@@ -199,12 +192,13 @@ class FrontEnd(object):
     def update(self):
         """ Update routine. Send velocities to Tello.
 
-            向Tello发送各方向速度信息
+            
         """
         if self.send_rc_control:
+            print(self.left_right_velocity, self.for_back_velocity, self.yaw_velocity, self.action_array)
             self.action_array[0] += self.left_right_velocity
-            self.action_array[1] + self.for_back_velocity
-            self.action_array[2] + self.yaw_velocity
+            self.action_array[1] += self.for_back_velocity
+            self.action_array[2] += self.yaw_velocity
             self.tello.send_rc_control(self.left_right_velocity, self.for_back_velocity,
                 self.up_down_velocity, self.yaw_velocity)
 
