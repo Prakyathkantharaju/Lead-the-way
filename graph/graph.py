@@ -1,19 +1,18 @@
 from abc import ABC, abstractmethod
 
-class robot(ABC):
-        
+class graph(ABC):
+    
     @abstractmethod
-    def control(self):
+    def add_info(self):
+        raise NotImplementedError
+
+
+    @abstractmethod
+    def add_edge(self):
         raise NotImplementedError
 
     @abstractmethod
-    def get_state(self):
+    def add_node(self):
         raise NotImplementedError
 
-    @abstractmethod
-    def get_config(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_graph(self):
-        raise NotImplementedError 
+    
