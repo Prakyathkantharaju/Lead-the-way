@@ -4,9 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import cv2
 from PIL import Image
-import random
 import torch
-import torchvision
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from tqdm import tqdm
