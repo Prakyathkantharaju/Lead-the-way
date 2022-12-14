@@ -15,5 +15,5 @@ class robot(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_graph(self):
+    def add_graph(self):
         raise NotImplementedError 
