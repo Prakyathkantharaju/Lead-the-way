@@ -7,6 +7,11 @@
 import numpy as np
 from AlphaBot import AlphaBot
 from UDPComms import Subscriber, Publisher, timeout, Scope
+import picamera
+import pickle
+import zmq
+import time
+
 
 
 
@@ -19,7 +24,12 @@ class diff_car:
         self.config = config
         self.ab = AlphaBot()
         self.speed = self.config["speed"]
+        self.pub_port = self.config["pub_port"]
+        self.pub_ip = self.config["pub_ip"]
+        self.pub_topic = self.config["pub_topic"]
         self.location = 0
+        self.camera = picamera.PiCamera()
+        self.npimage = np.empty((480, 640, 3), dtype=np.uint8)
         self._initialize_speed()
 
     def _initialize_speed(self):
@@ -30,10 +40,26 @@ class diff_car:
         return self.location + update_rotation
 
     def Update(self):
+        context = zmq.Context()
+        socket = context.socket(zmq.PUB)
+        ip_port = "tcp://{}:{}".format(self.pub_ip, self.pub_port)
+        socket.bind(ip_port)
+        time.sleep(2)
         while True:
             try: #type: ignore
                 data = self.sub.get()
-                output = self._control(data['command'], data['speed'])
+                _ = self._control(data['command'], data['speed'])
+                with picamera.PiCamera() as camera:
+                    camera.resolution = (640, 480)
+                    camera.capture(self.npimage, 'rgb')
+                    dict = {'location': self.location, 'image': self.npimage,
+                            'command': data['command'], 'speed': data['speed'],
+                            }
+                    data = pickle.dumps(dict)
+                    socket.send_string(self.pub_topic, flags=zmq.SNDMORE)
+                    socket.send_pyobj(data)
+                    print(f"Sent data to {self.pub_topic}")
+                    
             expect timeout: #type: ignore
                 pass #type: ignore
 
@@ -68,5 +94,7 @@ class diff_car:
 
 if __name__ == "__main__":
     # Create a robot object
-    robot = diff_car("diff_car", {"speed": 40, "return_ip": "192.168.0.102"})
+    robot = diff_car("diff_car", {"speed": 40,
+                                  "pub_port": 5555, "pub_ip": "192.168.0.102",
+                                  "pub_topic": "diff_car"})
     robot.Update()
