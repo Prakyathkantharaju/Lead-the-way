@@ -31,18 +31,15 @@ class GraphStructure(object):
         self.features = []
         self.node_number = 1
 
-    def _get_three_images(self, img: npt.ArrayLike) ->  Tuple:
-        dim = img.shape[0]
-        return (img[:,:dim // 3, :], img[:, dim//3 :dim*2//3, :], img[:,-dim//3:, :])
 
-    def _get_features(self, image: npt.ArrayLike) -> None:
+    def _get_features(self, image: npt.ArrayLike) -> torch.Tensor:
         img = Image.fromarray(image)
         img_transformed = self.tranformation(img).unsqueeze(0).to("cuda")
         im_vec = torch.tensor(self.model.extract_features(img_transformed).view(-1)).unsqueeze(0)
         return im_vec
  
     def add_images(self, img: npt.ArrayLike, X_Y_R: List[float] ) -> float:
-        self.images = self._get_three_images(img)
+        self.image = img
         self._process_images(X_Y_R)
 
     def _add_node(self, number: int, features: npt.ArrayLike, images = npt.ArrayLike) -> None:
@@ -53,19 +50,13 @@ class GraphStructure(object):
         self.central_nodes = 0
         number = self.node_number
         nodes_add = []
-        for i in range(3):
-            self.features.append(self._get_features(self.images[i]))
-            if i == 1:
-                self.central_nodes = number  + i
-            self._add_node(number + i, self.features[-1], self.images[i])
-            nodes_add.append(number + i)
-
+        features = self._get_features(self.image)
+        self._add_node(number + i, features, self.image)
         # adding edges to the nodes
-        self.Graph.add_edge(nodes_add[0], nodes_add[1], weight = 0.1, direction = '-1', distance = [])
         self.Graph.add_edge(nodes_add[1], nodes_add[2], weight = 0.1, direction = '1', distance = [])
 
         # update the node number
-        self.node_number += 3
+        self.node_number += 1
 
     def _find_root_edge(self, X_Y_R: List[float], threshold: float  = 0.5):
         number = self.node_number
