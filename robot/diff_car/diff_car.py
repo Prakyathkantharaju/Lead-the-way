@@ -60,7 +60,7 @@ class diff_car:
                     socket.send_pyobj(data)
                     print(f"Sent data to {self.pub_topic}")
                     
-            expect timeout: #type: ignore
+            except timeout: #type: ignore
                 pass #type: ignore
 
     def _control(self, direction: str, speed: int = 40):
