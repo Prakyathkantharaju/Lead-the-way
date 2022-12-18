@@ -13,7 +13,4 @@ class Control(abc.ABC):
         raise NotImplementedError
 
 
-    @abc.abstractmethod
-    def process_event(self, event):
-        raise NotImplementedError
 
