@@ -6,12 +6,12 @@
 - Adapt to moving target ?
 
 # Tasks
-- [ ] Setup the feature extractor.
-- [ ] Learn about the neural slam and funtions needed.
-- [ ] generate the network of the paths.
-- [ ] Add distance meaures between the images locations.
+- [x] Setup the feature extractor.
+- [x] Learn about the neural slam and funtions needed.
+- [x] generate the network of the paths.
+- [x] Add distance meaures between the images locations.
 - [ ] To a forward traverse and find the fastest path.
-- [ ] Add distance traveled ?
+- [x] Add distance traveled ?
 
 
 
