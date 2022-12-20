@@ -18,6 +18,8 @@ class command:
     UP: str = "up"
     DOWN: str = "down"
     HOVER: str = "hover" # else case
+    CW: str = "cw"
+    CCW: str = "ccw"
 
 
 
@@ -27,7 +29,7 @@ class Drone_controller(Control):
         self.pub = Publisher(port=port, scope=Scope.NETWORK)
         # self.pub.BROADCAST_IP = ip # type: ignore
         self.dict_send = {}
-        self.dict_send["speed"] = 40
+        self.dict_send["speed"] = 20
         self.dict_send["command"] = command.HOVER
         pygame.init()
         self.screen = pygame.display.set_mode((500, 250))
@@ -50,9 +52,9 @@ class Drone_controller(Control):
                 elif key[pygame.K_DOWN]:
                     self.dict_send["command"] = command.BACKWARD
                 elif key[pygame.K_LEFT]:
-                    self.dict_send["command"] = command.LEFT
+                    self.dict_send["command"] = command.CCW
                 elif key[pygame.K_RIGHT]:
-                    self.dict_send["command"] = command.RIGHT
+                    self.dict_send["command"] = command.CW
                 elif key[pygame.K_SPACE]:
                     self.dict_send["command"] = command.HOVER
                 elif key[pygame.K_w]:
@@ -63,6 +65,10 @@ class Drone_controller(Control):
                     self.dict_send["command"] = command.TAKEOFF
                 elif key[pygame.K_e]:
                     self.dict_send["command"] = command.LAND
+                elif key[pygame.K_a]:
+                    self.dict_send["command"] = command.LEFT
+                elif key[pygame.K_d]:
+                    self.dict_send["command"] = command.RIGHT
                 elif key[pygame.K_f]:
                     self.dict_send["speed"] += 1
                 else:
@@ -77,6 +83,6 @@ class Drone_controller(Control):
 
 
 if __name__ == "__main__":
-    control = Drone_controller(5558)
+    control = Drone_controller(8888)
     control.update()
 

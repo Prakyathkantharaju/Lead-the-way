@@ -20,8 +20,8 @@ import pickle
 
 
 # data storeing classes for each robot
-from diff_car import DiffCar
-from drone import Drone
+from diff_car_client import DiffCar
+from drone_client import Drone
 
 
 
@@ -37,9 +37,9 @@ class MainReceiver:
         self.ctx = Context.instance()
 
         # init hello world publisher obj
-        self.diff_car_config = DiffCar()
+        self.diff_car_config = DiffCar({'data_store': ''})
 
-        self.drone_config = Drone()
+        self.drone_config = Drone({'data_store': ''})
 
     def main(self) -> None:
 

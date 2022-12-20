@@ -1,4 +1,4 @@
-from ..robot import robot
+# from ..robot import robot
 from djitellopy import Tello
 import numpy as np
 import time
@@ -19,10 +19,12 @@ class command:
     LAND: str = "land"
     UP: str = "up"
     DOWN: str = "down"
+    CW: str = "cw"
+    CCW: str = "ccw"
 
-class Drone(robot):
+class Drone(object):
     def __init__(self, config: dict) -> None:
-        super().__init__(name=config['name'],config=config) # Call the parent class constructor
+        # super().__init__(name=config['name'],config=config) # Call the parent class constructor
         self._name = config['name']
         self.speed = config['speed']
         self.tello = Tello()
@@ -37,6 +39,7 @@ class Drone(robot):
         self.pub_topic = config['pub_topic']
         self.start_time = time.time()
         self.state = [0, 0, 0]
+        self.incoming_data = {}
 
 
 
@@ -61,7 +64,9 @@ class Drone(robot):
         while True:
             try:
                 data = self.subscriber.get()
+                print(data)
                 self._update_constants(data['command'], data['speed'])
+                self.incoming_data = data
                 self._update_drone()
                 img = frame_read.frame
                 self._package_send(img)
@@ -76,15 +81,17 @@ class Drone(robot):
         self.state = [self.for_back_velocity, 
                     self.left_right_velocity, 
                     self.up_down_velocity]
-        time = time.time() - self.start_time #type: ignore
+        time_diff = time.time() - self.start_time #type: ignore
         self.socket.send_string(self.pub_topic, zmq.SNDMORE)
-        dict_store = {'location': self.state, 'time': time, 'img': img}
+        dict_store = {'location': self.state, 'time': time_diff, 'img': img, 
+                    'command': self.incoming_data['command'], 'speed': self.incoming_data['speed']}
         data = pickle.dumps(dict_store)
         self.socket.send_pyobj(data)
         print(f"sent data to {self.pub_topic}")
         self.for_back_velocity = 0
         self.left_right_velocity = 0
         self.up_down_velocity = 0
+        self.yaw_velocity = 0
 
 
     def _update_constants(self, cmd: str, speed: int) -> None:
@@ -100,11 +107,21 @@ class Drone(robot):
             self.up_down_velocity += speed
         elif cmd == 'down':
             self.up_down_velocity -= speed
+        elif cmd == 'left':
+            self.left_right_velocity += speed
+        elif cmd == 'right':
+            self.left_right_velocity += speed
         elif cmd == 'cw':
-            self.left_right_velocity += speed
+            self.yaw_velocity += speed
         elif cmd == 'ccw':
-            self.left_right_velocity += speed
+            self.yaw_velocity -= speed
         else:
+            self.for_back_velocity = 0
+            self.left_right_velocity = 0
+            self.up_down_velocity = 0
+            self.yaw_velocity = 0
+            self._update_drone()
+            
             print('Command not recognized...')
 
 
@@ -143,6 +160,7 @@ if __name__ == '__main__':
               'sub_port': 8888,
               'serv_ip': '127.0.0.1',
               'serv_port': 5556,
+              'pub_topic': 'drone'
               }
 
     drone = Drone(config)

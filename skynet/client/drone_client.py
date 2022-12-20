@@ -29,7 +29,7 @@ class Drone:
                       robot_name:str = "drone") -> None:
         id = self.Graph.number_of_nodes()
         self.Graph.add_node(id, features=features, location=data['location'],
-                            image = data['image'])
+                            image = data['img'], time = data['time'])
         # if not starting node please add edge
         if self.Graph.number_of_nodes() > 1:
             self.Graph.add_edge(id, id - 1, robot_name=robot_name,
