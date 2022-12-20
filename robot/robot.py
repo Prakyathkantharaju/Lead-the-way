@@ -1,5 +1,15 @@
 from abc import ABC, abstractmethod
+import dataclasses
 
+
+
+@dataclasses.dataclass
+class command:
+    left: str = "left"
+    right: str = "right"
+    forward: str = "forward"
+    backward: str = "backward"
+    stop: str = "stop"
 class robot(ABC):
 
     def __init__(self, name, config):
