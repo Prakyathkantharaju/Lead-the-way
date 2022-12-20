@@ -31,6 +31,6 @@ class robot(ABC):
     def get_config(self):
         raise NotImplementedError
 
-    @abstractmethod
-    def add_graph(self):
-        raise NotImplementedError 
+    # @abstractmethod
+    # def add_graph(self):
+    #     raise NotImplementedError 

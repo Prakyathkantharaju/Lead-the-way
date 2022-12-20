@@ -7,10 +7,10 @@
 import numpy as np
 from AlphaBot import AlphaBot
 from UDPComms import Subscriber, Publisher, timeout, Scope
-import picamera
 import pickle
 import zmq
 import time
+import cv2
 
 
 
@@ -28,7 +28,7 @@ class diff_car:
         self.pub_ip = self.config["pub_ip"]
         self.pub_topic = self.config["pub_topic"]
         self.location = 0
-        self.camera = picamera.PiCamera()
+        self.camera = cv2.VideoCapture(0) #type: ignore
         self.npimage = np.empty((480, 640, 3), dtype=np.uint8)
         self._initialize_speed()
 
@@ -49,9 +49,10 @@ class diff_car:
             try: #type: ignore
                 data = self.sub.get()
                 _ = self._control(data['command'], data['speed'])
-                with picamera.PiCamera() as camera:
-                    camera.resolution = (640, 480)
-                    camera.capture(self.npimage, 'rgb')
+                success, frame = self.camera.read()
+                if success:
+                    self.npimage = np.array(frame)
+
                     dict = {'location': self.location, 'image': self.npimage,
                             'command': data['command'], 'speed': data['speed'],
                             }
@@ -59,6 +60,8 @@ class diff_car:
                     socket.send_string(self.pub_topic, flags=zmq.SNDMORE)
                     socket.send_pyobj(data)
                     print(f"Sent data to {self.pub_topic}")
+                else:
+                    print("Error reading frame")
                     
             except timeout: #type: ignore
                 pass #type: ignore
