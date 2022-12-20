@@ -73,7 +73,6 @@ class Drone(robot):
         self.tello.end()
 
     def _package_send(self, img: np.ndarray) -> None:
-        #TODO: Send the image to the server using zmq
         self.state = [self.for_back_velocity, 
                     self.left_right_velocity, 
                     self.up_down_velocity]
@@ -119,20 +118,15 @@ class Drone(robot):
 
     def get_state(self) -> List[int]:
         return self.state
-
-
-
-
-
-            # frame = frame_read.frame
-            # # battery n. 电池
-            # text = "Battery: {}%".format(self.tello.get_battery())
-            # cv2.putText(frame, text, (5, 720 - 5),
-            #     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            # 
-            # frame = np.rot90(frame)
-            # frame = np.flipud(frame)
+        # frame = frame_read.frame
+        # # battery n. 电池
+        # text = "Battery: {}%".format(self.tello.get_battery())
+        # cv2.putText(frame, text, (5, 720 - 5),
+        #     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # 
+        # frame = np.rot90(frame)
+        # frame = np.flipud(frame)
 
 
 

@@ -46,3 +46,10 @@ class PickleSQLiteHelper:
             results.append((image, location, pickle_obj))
         return results
 
+if __name__ == '__main__':
+    databasehelper = PickleSQLiteHelper('databases/test.db')
+    databasehelper.create_table('test')
+    last_row = databasehelper.insert_pickle('test', 1, np.zeros(shape= (3,480,640)), [1, 2, 3], pickle.dumps({'a': 1, 'b': 2, 'c': 3}))
+    print(last_row)
+    print(databasehelper.retrieve_pickle('test', 1))
+
