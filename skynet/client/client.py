@@ -18,7 +18,10 @@ import zmq.asyncio
 from zmq.asyncio import Context
 import pickle
 
+
+# data storeing classes for each robot
 from diff_car import DiffCar
+from drone import Drone
 
 
 
@@ -35,6 +38,8 @@ class MainReceiver:
 
         # init hello world publisher obj
         self.diff_car_config = DiffCar()
+
+        self.drone_config = Drone()
 
     def main(self) -> None:
 
@@ -66,6 +71,7 @@ class MainReceiver:
                 topic = await sub.recv_string()
                 msg = await sub.recv_pyobj()
                 print(f"world sub; topic: {topic}\tmessage: {pickle.loads(msg)}")
+                self.drone_config.processing_function(msg)
                 # process message
 
                 await asyncio.sleep(1)

@@ -142,7 +142,7 @@ if __name__ == '__main__':
               'speed': 60,
               'sub_port': 8888,
               'serv_ip': '127.0.0.1',
-              'serv_port': 5558,
+              'serv_port': 5556,
               }
 
     drone = Drone(config)
