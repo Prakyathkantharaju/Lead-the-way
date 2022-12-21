@@ -6,8 +6,9 @@
 - Adapt to moving target ?
 
 # Tasks
- - [ ] Test the drone controller and the movement.
- - [ ] Test the car controller and the movement.
+ - [x] Test the drone controller and the movement.
+ - [x] Test the car controller and the movement.
+ - [ ] Collect data and develop the server side algorithm.
  - [ ] Write the code for the quad code for controller and movement.
 
 # Notes
