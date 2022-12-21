@@ -1,9 +1,4 @@
-import numpy as np
 import pickle
-import torch
-from efficientnet_pytorch import EfficientNet
-import torchvision.transforms as transforms
-# from PIL import Image
 import networkx as nx
 
 # local
@@ -15,11 +10,6 @@ class DiffCar(object):
     def __init__(self, config) -> None:
         self.config = config
         self.data_store = config['data_store']
-        self.model = EfficientNet.from_pretrained('efficientnet-b0')
-        self.tranformation = transforms.Compose([transforms.Resize(224), 
-                                                 transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
-        self.cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
         self.seed = 13648
         self.Graph = nx.Graph()
         self.db = PickleSQLiteHelper(self.data_store)
@@ -55,7 +45,7 @@ class DiffCar(object):
         if self.counter is None:
             self.counter = 0
         updated_counter = self.db.insert_pickle('diff_car', self.counter+1, 
-                            data['image'], data['location'] + data['time'], 
+                            data['image'], data['location'], data['time'], 
                               graph_pickle)
         self.counter = updated_counter
         
