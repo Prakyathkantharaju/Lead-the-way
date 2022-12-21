@@ -8,6 +8,9 @@
 # Tasks
  - [x] Test the drone controller and the movement.
  - [x] Test the car controller and the movement.
+ - [ ] Test the Search algorithms for image search.
+   - [ ] Facebook search algorithm.
+   - [ ] structural search algorithm.
  - [ ] Collect data and develop the server side algorithm.
  - [ ] Write the code for the quad code for controller and movement.
 
@@ -42,4 +45,3 @@
 #### 3. Graph exploration
 - If the robot is free it will explore the graph.
 - If the node is has less weight then explore the node.
-

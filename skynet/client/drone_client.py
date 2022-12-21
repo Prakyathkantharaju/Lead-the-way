@@ -40,13 +40,15 @@ class Drone:
         # get features from the image
         # features = self._get_features(image)
         self._update_graph(data)
+        print(f"Counter {self.counter}")
         graph_pickle = pickle.dumps(self.Graph)
         if self.counter is None:
             self.counter = 0
         updated_counter = self.db.insert_pickle('drone', self.counter+1, 
-                            data['image'], data['location'], data['time'], 
+                            data['img'], data['location'], data['time'], 
                               graph_pickle)
         self.counter = updated_counter
+        print(self.counter)
 
 
 

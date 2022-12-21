@@ -37,9 +37,9 @@ class MainReceiver:
         self.ctx = Context.instance()
 
         # init hello world publisher obj
-        self.diff_car_config = DiffCar({'data_store': ''})
+        self.diff_car_config = DiffCar({'data_store': 'databases/diff_car.db'})
 
-        self.drone_config = Drone({'data_store': ''})
+        self.drone_config = Drone({'data_store': 'databases/drone.db'})
 
     def main(self) -> None:
 
@@ -70,8 +70,8 @@ class MainReceiver:
             while True:
                 topic = await sub.recv_string()
                 msg = await sub.recv_pyobj()
-                print(f"world sub; topic: {topic}\tmessage: {pickle.loads(msg)}")
-                self.drone_config.processing_function(msg)
+                # print(f"world sub; topic: {topic}\tmessage: {pickle.loads(msg)}")
+                self.drone_config.process_function(msg)
                 # process message
 
                 await asyncio.sleep(1)
