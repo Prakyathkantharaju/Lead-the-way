@@ -94,7 +94,7 @@ class MainReceiver:
         print("Setting up world sub")
         # setup subscriber
         sub = self.ctx.socket(zmq.SUB)
-        url = f"tcp://{'127.0.0.1'}:{5557}"
+        url = f"tcp://{'192.168.0.225'}:{5557}"
         sub.connect(url)
         sub.setsockopt(zmq.SUBSCRIBE, b'diff_car')
         print("World sub initialized")

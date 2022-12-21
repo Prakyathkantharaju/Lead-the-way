@@ -60,7 +60,7 @@ class Diff_controller(Control):
 
 
 if __name__ == "__main__":
-    control = Diff_controller("192.168.0.115", 5557)
+    control = Diff_controller("192.168.0.115", 8889)
     control.update()
 
 

@@ -12,7 +12,7 @@ class PickleSQLiteHelper:
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, image BLOB, location BLOB, pickle BLOB)")
         self.conn.commit()
 
-    def insert_pickle(self, table_name, id: int, image: np.ndarray, location: List[int], pickle_obj: bytes):
+    def insert_pickle(self, table_name: str, id: int, image: np.ndarray, location: List[int], pickle_obj: bytes):
         # Convert the image and location to binary strings
         image_str = image.tobytes()
         location_str = pickle.dumps(location)
@@ -31,6 +31,9 @@ class PickleSQLiteHelper:
         location = pickle.loads(row[1])
         pickle_obj = pickle.loads(row[2])
         return image, location, pickle_obj
+
+    def get_count(self) -> int|None:
+        return self.cursor.lastrowid
 
 
 

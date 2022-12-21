@@ -19,7 +19,7 @@ import cv2
 class diff_car:
     def __init__(self, name: str, config: dict):
         # Call the base class constructor
-        self.sub = Subscriber(port = 8888)
+        self.sub = Subscriber(port = 8889 )
         self.name = name
         self.config = config
         self.ab = AlphaBot()
@@ -31,6 +31,8 @@ class diff_car:
         self.camera = cv2.VideoCapture(0) #type: ignore
         self.npimage = np.empty((480, 640, 3), dtype=np.uint8)
         self._initialize_speed()
+        self.COMMAND_RATE  = 0.1
+        self._last_control = time.time()
 
     def _initialize_speed(self):
         self.ab.setPWMA(self.speed)
@@ -43,23 +45,35 @@ class diff_car:
         context = zmq.Context()
         socket = context.socket(zmq.PUB)
         ip_port = "tcp://{}:{}".format(self.pub_ip, self.pub_port)
+        print(ip_port)
         socket.bind(ip_port)
         time.sleep(2)
         while True:
             try: #type: ignore
                 data = self.sub.get()
+
+
                 _ = self._control(data['command'], data['speed'])
+                time.sleep(self.COMMAND_RATE) # motor is running
+                self.speed = 0 # stop
+                self._initialize_speed()
+                # self._last_control = time.time()
+                    
                 success, frame = self.camera.read()
                 if success:
+                    
                     self.npimage = np.array(frame)
 
-                    dict = {'location': self.location, 'image': self.npimage,
+                    dict = {'location': self.location, 'img': self.npimage,
                             'command': data['command'], 'speed': data['speed'],
+                            'time':time.time() - self._last_control
                             }
                     data = pickle.dumps(dict)
                     socket.send_string(self.pub_topic, flags=zmq.SNDMORE)
                     socket.send_pyobj(data)
                     print(f"Sent data to {self.pub_topic}")
+                    
+
                 else:
                     print("Error reading frame")
                     
@@ -68,8 +82,12 @@ class diff_car:
 
     def _control(self, direction: str, speed: int = 40):
         Rotation_A = np.array([0, 0, 0])
+        print(direction, speed)
         if speed != self.speed:
+            print("updating speed to", speed)
+            
             self.speed = speed
+            self._initialize_speed()
 
         if direction == "forward":
             self.ab.forward()
@@ -97,7 +115,7 @@ class diff_car:
 
 if __name__ == "__main__":
     # Create a robot object
-    robot = diff_car("diff_car", {"speed": 40,
-                                  "pub_port": 5555, "pub_ip": "192.168.0.102",
+    robot = diff_car("diff_car", {"speed": 0,
+                                  "pub_port": 5557, "pub_ip": "0.0.0.0",
                                   "pub_topic": "diff_car"})
     robot.Update()
