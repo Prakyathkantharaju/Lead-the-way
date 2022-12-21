@@ -19,16 +19,16 @@ class Drone:
         self.seed = 13648
         self.Graph = nx.Graph()
 
-    def _get_features(self, image: np.ndarray) -> torch.Tensor:
-        img = Image.fromarray(image)
-        img_transformed = self.tranformation(img)
-        im_vev = torch.tensor(self.model.extract_features(img_transformed).view(-1)).unsqueeze(0)
-        return im_vev
+    # def _get_features(self, image: np.ndarray) -> torch.Tensor:
+    #     img = Image.fromarray(image[np.newaxis,:])
+    #     img_transformed = self.tranformation(img)
+    #     im_vev = torch.tensor(self.model.extract_features(img_transformed).view(-1)).unsqueeze(0)
+    #     return im_vev
 
-    def _update_graph(self, features: torch.Tensor, data:dict,
+    def _update_graph(self, data:dict,
                       robot_name:str = "drone") -> None:
         id = self.Graph.number_of_nodes()
-        self.Graph.add_node(id, features=features, location=data['location'],
+        self.Graph.add_node(id, location=data['location'],
                             image = data['img'], time = data['time'])
         # if not starting node please add edge
         if self.Graph.number_of_nodes() > 1:
@@ -39,10 +39,11 @@ class Drone:
 
     def processing_function(self, msg):
         data = pickle.loads(msg)
-        image = data['image']
+        image = data['img']
+        print(image.shape)
         # get features from the Image
-        features = self._get_features(image)
-        self._update_graph(features, data)
+        # features = self._get_features(image)
+        self._update_graph( data)
 
 
 
