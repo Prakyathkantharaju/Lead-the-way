@@ -45,7 +45,7 @@ class DiffCar(object):
         if self.counter is None:
             self.counter = 0
         updated_counter = self.db.insert_pickle('diff_car', self.counter+1, 
-                            data['image'], data['location'], data['time'], 
+                            data['img'], data['location'], data['time'], 
                               graph_pickle)
         self.counter = updated_counter
         
