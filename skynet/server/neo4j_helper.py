@@ -4,24 +4,27 @@
 
 import neo4j
 from typing import List, Tuple, Dict, Any, Protocol
+import pandas as pd
 
+class Neo4jGraphCreator(Protocol):
+    def close(self):
+        ...
 
-class Neo4jAddition(Protocol):
+    def create_node(self, location: List, image: bytes, command: bytes) -> pd.DataFrame:
+        ...
+
+    def setup_connection(self) -> pd.DataFrame:
+        ...
+
     def close(self) -> None:
         ...
 
-    def create_node(self, location: List, image: bytes, command: bytes) -> None:
+    def setup_previous(self) -> pd.DataFrame:
         ...
 
-    def setup_connection(self) -> None:
-        ...
-
-class Neo4jRetrieval(Protocol):
+class Neo4jgraphSearch(Protocol):
     def close(self) -> None:
         ...
 
-    def get_last_node(self) -> int:
-        ...
-
-    def get_node_by_location(self, start_location: int, end_location: int) -> neo4j.Record:
+    def search(self, start_location: List[float], end_location: List[float]) -> pd.DataFrame:
         ...

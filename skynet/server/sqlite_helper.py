@@ -1,12 +1,15 @@
 import sqlite3
 import pickle
 import numpy as np
-from typing import List
+from typing import List, Any
 
 class PickleSQLiteHelper:
     def __init__(self, db_name: str):
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
+
+    def commit(self):
+        self.conn.commit()
 
     def create_table(self, table_name: str):
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY, image BLOB, location BLOB, time BLOB, pickle BLOB)")
@@ -25,7 +28,7 @@ class PickleSQLiteHelper:
         self.conn.commit()
         return self.cursor.lastrowid
 
-    def retrieve_pickle(self, table_name: str, id: int):
+    def retrieve_data(self, table_name: str, id: int):
         self.cursor.execute(f"SELECT image, location, time, pickle FROM {table_name} WHERE id=?", (id,))
         # Retrieve the image, location, and pickle object from the binary strings
         row = self.cursor.fetchone()
@@ -34,7 +37,7 @@ class PickleSQLiteHelper:
         pickle_obj = pickle.loads(row[2])
         return image, location, pickle_obj
 
-    def get_count(self) -> int|None:
+    def get_count(self) -> Any:
         return self.cursor.lastrowid
 
 
