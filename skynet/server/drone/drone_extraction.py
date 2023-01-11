@@ -23,7 +23,6 @@ extractor_config = {
     "location": "databases/drone.db",
     "table_name": "drone"
 }
-raspberry
 
 class Drone: 
     """Class to extract the drone data from the database
