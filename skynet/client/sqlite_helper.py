@@ -1,7 +1,7 @@
 import sqlite3
 import pickle
 import numpy as np
-from typing import List
+from typing import List, Any
 
 class PickleSQLiteHelper:
     def __init__(self, db_name: str):
@@ -34,7 +34,7 @@ class PickleSQLiteHelper:
         pickle_obj = pickle.loads(row[2])
         return image, location, pickle_obj
 
-    def get_count(self) -> int|None:
+    def get_count(self) -> Any:
         return self.cursor.lastrowid
 
 
